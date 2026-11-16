@@ -1,3 +1,10 @@
-./coverage
 .env
 .env.*
+/coverage/
+bin/
+obj/
+.sonarqube/
+TestResults/
+.vs/
+.idea/
+*.user

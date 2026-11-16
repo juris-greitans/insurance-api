@@ -1,0 +1,9 @@
+root = true
+
+[*.cs]
+indent_style = space
+indent_size = 4
+
+# Test names follow MethodUnderTest_WhenCondition_ThenExpectedResult
+[tests/**.cs]
+dotnet_diagnostic.CA1707.severity = none

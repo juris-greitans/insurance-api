@@ -32,6 +32,8 @@ insurance-api/
 │       └── Controllers/       # Endpoints, request DTOs, input validation
 ├── tests/
 │   └── Insurance.Api.Tests/   # xUnit: Unit/ and Integration/
+├── .editorconfig              # Code style and analyzer settings
+├── Directory.Build.props      # Shared build settings (warnings as errors)
 ├── coverlet.runsettings       # Coverage settings
 └── Insurance.slnx             # Solution file
 ```

@@ -33,13 +33,3 @@ public sealed record Customer
         return new Customer(Guid.NewGuid(), trimmed);
     }
 }
-
-public static class CustomerErrors
-{
-    public static readonly DomainError FullNameRequired =
-        DomainError.Validation("Customer.FullNameRequired", "Full name is required.");
-
-    public static readonly DomainError FullNameTooLong = DomainError.Validation(
-        "Customer.FullNameTooLong",
-        $"Full name must be at most {Customer.FullNameMaxLength} characters.");
-}

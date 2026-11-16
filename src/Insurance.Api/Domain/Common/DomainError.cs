@@ -1,12 +1,5 @@
 namespace Insurance.Api.Domain.Common;
 
-public enum ErrorType
-{
-    Validation,
-    NotFound,
-    Conflict,
-}
-
 public sealed record DomainError(ErrorType Type, string Code, string Message)
 {
     public static DomainError Validation(string code, string message) => new(ErrorType.Validation, code, message);

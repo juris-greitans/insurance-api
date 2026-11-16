@@ -78,7 +78,8 @@ Validation happens at two levels:
 
 ## Code conventions
 
-- One top-level type per file, with the file named after the type.
+- One top-level type per file, with the file named after the type. Exception: `Result` and `Result<T>` share
+  `Result.cs`.
 - One test class per class under test, named `<Class>Tests` in its own file, in the folder under `Unit/` that mirrors
   the source folder.
 

@@ -15,9 +15,9 @@ builder.Services.AddSingleton<ICustomerRepository, InMemoryCustomerRepository>()
 builder.Services.AddSingleton<IPolicyRepository, InMemoryPolicyRepository>();
 builder.Services.AddSingleton<IClaimRepository, InMemoryClaimRepository>();
 builder.Services.AddSingleton<WriteLock>();
-builder.Services.AddScoped<CustomerService>();
-builder.Services.AddScoped<PolicyService>();
-builder.Services.AddScoped<ClaimService>();
+builder.Services.AddSingleton<CustomerService>();
+builder.Services.AddSingleton<PolicyService>();
+builder.Services.AddSingleton<ClaimService>();
 
 var app = builder.Build();
 

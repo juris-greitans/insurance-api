@@ -32,7 +32,8 @@ Single project `src/Insurance.Api`, organised by folder. Layering is a conventio
 (deliberate simplification; rationale in `README.md`). No CQRS, no mediator library.
 
 - `Domain/` – entities, enums, `Result`/`DomainError` types. No dependency on ASP.NET Core or other folders.
-- `Application/` – services that orchestrate use cases; repository interfaces in `Application/Abstractions/`.
+- `Application/` – stateless services (registered as singletons) that orchestrate use cases; repository interfaces in
+  `Application/Abstractions/`.
 - `Infrastructure/` – in-memory repository implementations.
 - `Controllers/` – HTTP endpoints, request DTOs, input validation, mapping of `DomainError` to ProblemDetails.
 

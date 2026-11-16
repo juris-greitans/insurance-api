@@ -45,8 +45,9 @@ Single project `src/Insurance.Api`, organised by folder. Layering is a conventio
 - All data is lost on restart; that is expected.
 - **Check-then-act races:** `ConcurrentDictionary` does not make a check plus an update atomic. Two concurrent
   activations can both pass the overlap check; two concurrent decisions can both see `New`. Every state-changing
-  operation (check + update together) runs under a single global lock. Deliberately simple; throughput is not a
-  concern at this scope.
+  service operation runs load + check + save inside one `WriteLock.Execute` call (a singleton, single global lock).
+  Reads don't take the lock. Deliberately simple; throughput is not a concern at this scope. The concurrency tests in
+  `Unit/Application` fail when the lock is removed; keep it that way.
 
 ### Error handling
 
@@ -61,6 +62,9 @@ in one place (controller base class or helper):
 | `Validation` | 400    | invalid input, `EndDate <= StartDate`, Reject without reason, referenced customer/policy not found in a request body |
 | `NotFound`   | 404    | resource in the route (`/policies/{id}`) does not exist |
 | `Conflict`   | 409    | wrong status transition, overlapping active policy, claim on non-Active policy, incident outside policy period |
+
+Not-found errors (route 404 and referenced-resource 400) live in `Application/ApplicationErrors`; rule errors live
+in `<Entity>Errors` next to each entity.
 
 Validation happens at two levels:
 

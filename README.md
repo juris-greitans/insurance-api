@@ -23,10 +23,10 @@ claim → decide) and runs from Visual Studio, Rider or the VS Code REST Client.
 dotnet test
 ```
 
-With coverage (OpenCover report under `coverage/`):
+With coverage (OpenCover report under `coverage/`; clearing it first keeps stale reports out):
 
 ```bash
-dotnet test --collect:"XPlat Code Coverage" --settings coverlet.runsettings --results-directory ./coverage
+rm -rf coverage && dotnet test --collect:"XPlat Code Coverage" --settings coverlet.runsettings --results-directory ./coverage
 ```
 
 - **Unit tests** (`tests/Insurance.Api.Tests/Unit/`, folders mirror `src/`) cover entity invariants, services,
@@ -72,6 +72,7 @@ All errors are `application/problem+json`:
 - **404** – the resource in the URL doesn't exist.
 - **409** – a business rule blocks the action: wrong status, overlapping active policy, claim on a non-active policy,
   incident outside the policy period.
+- **415** – a POST body sent without `Content-Type: application/json`.
 
 Business-rule and not-found errors carry a stable `code`:
 

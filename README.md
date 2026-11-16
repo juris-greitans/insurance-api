@@ -107,6 +107,6 @@ Interpretations of points the requirements leave open:
   1000 characters.
 - `FullName` is required, not whitespace-only, max 250 characters. It and `DecisionReason` are stored trimmed.
 - When a request breaks both a validation rule and a business rule, 400 is returned rather than 409.
-- Enums are sent as strings; unknown values and numeric values return 400.
+- Enum values must match a member name exactly (case-sensitive); anything else, including numbers, returns 400.
 - A malformed id in the route (not a GUID) returns 400; a well-formed id that doesn't exist returns 404.
 - Create endpoints return `201 Created` with `Location`; `activate` and `decide` return `200 OK` with the updated resource.

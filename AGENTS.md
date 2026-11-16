@@ -102,8 +102,11 @@ Customer → Policy → Claim (each references its parent by `Guid`).
 - Money is `decimal`, never a floating-point type. Single implicit currency (EUR); no currency field.
   At most 2 decimal places → otherwise 400.
 - Dates are `DateOnly` (calendar dates, no time zones), serialised as `yyyy-MM-dd`. Today's date is not part of any rule.
-- Enums are serialised as strings; unknown values and integers → 400 (`allowIntegerValues: false`, so enum order
-  never becomes part of the API).
+- Enums are read only from their exact, case-sensitive member names (`Controllers/Json/StrictEnumConverter`); anything
+  else → 400. Don't switch back to `JsonStringEnumConverter` for MVC: it accepts numbers, any casing and
+  comma-separated names that it OR's together (`"Approve, Reject"` → `Reject`).
+- The OpenAPI generator reads `ConfigureHttpJsonOptions`, not the MVC JSON options. That's where a
+  `JsonStringEnumConverter` makes the document list enum names; without it enums are documented as integers.
 
 ### Customer
 

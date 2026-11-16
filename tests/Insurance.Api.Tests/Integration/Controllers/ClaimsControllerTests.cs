@@ -219,6 +219,21 @@ public class ClaimsControllerTests(WebApplicationFactory<Program> factory)
         Assert.Equal(ClaimStatus.New, stored.Status);
     }
 
+    [Theory]
+    [InlineData("Approve, Reject")]
+    [InlineData("approve")]
+    [InlineData(" Reject")]
+    public async Task Decide_WhenDecisionNotExactName_ThenValidationProblemAndClaimStaysNew(string decision)
+    {
+        var claim = await NewClaimAsync();
+
+        var response = await DecideAsync(claim.Id, decision, "Reason");
+
+        await ProblemAssert.IsValidationProblemAsync(response, "decision");
+        var stored = await ApiTestClient.ReadSuccessAsync<ClaimResponse>(await _api.GetAsync($"/claims/{claim.Id}"));
+        Assert.Equal(ClaimStatus.New, stored.Status);
+    }
+
     [Fact]
     public async Task Decide_WhenDecisionMissing_ThenValidationProblem()
     {

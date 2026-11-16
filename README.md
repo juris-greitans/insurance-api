@@ -20,6 +20,45 @@ dotnet test
 
 Unit tests cover entities and services; integration tests run the API in-process via `WebApplicationFactory`.
 
+## API
+
+| Method | Path | Success | Errors |
+|---|---|---|---|
+| POST | `/customers` | 201 | 400 |
+| GET | `/customers/{id}` | 200 | 400, 404 |
+| POST | `/policies` | 201 (Draft) | 400 |
+| POST | `/policies/{id}/activate` | 200 | 400, 404, 409 |
+| GET | `/policies/{id}` | 200 | 400, 404 |
+| POST | `/claims` | 201 (New) | 400, 409 |
+| POST | `/claims/{id}/decide` | 200 | 400, 404, 409 |
+| GET | `/claims/{id}` | 200 | 400, 404 |
+
+Example requests:
+
+```json
+POST /policies
+{ "customerId": "…", "productType": "Auto", "startDate": "2026-01-01", "endDate": "2026-12-31", "premium": 100.50 }
+
+POST /claims/{id}/decide
+{ "decision": "Reject", "decisionReason": "Not covered" }
+```
+
+All errors are `application/problem+json`. Business-rule and not-found errors carry a stable `code`:
+
+```json
+{
+  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.10",
+  "title": "Conflict",
+  "status": 409,
+  "detail": "Only a draft policy can be activated.",
+  "code": "Policy.NotDraft",
+  "traceId": "…"
+}
+```
+
+Malformed JSON, wrong field types and missing non-text fields return a standard validation problem with an `errors`
+object keyed by field. Text fields (`fullName`, `decisionReason`) are validated by the domain and return a `code`.
+
 ## Project structure
 
 ```text
@@ -68,5 +107,6 @@ Interpretations of points the requirements leave open:
   1000 characters.
 - `FullName` is required, not whitespace-only, max 250 characters. It and `DecisionReason` are stored trimmed.
 - When a request breaks both a validation rule and a business rule, 400 is returned rather than 409.
-- Enums are sent as strings; unknown values return 400.
+- Enums are sent as strings; unknown values and numeric values return 400.
+- A malformed id in the route (not a GUID) returns 400; a well-formed id that doesn't exist returns 404.
 - Create endpoints return `201 Created` with `Location`; `activate` and `decide` return `200 OK` with the updated resource.

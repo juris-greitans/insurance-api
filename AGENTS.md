@@ -35,7 +35,16 @@ Single project `src/Insurance.Api`, organised by folder. Layering is a conventio
 - `Application/` – stateless services (registered as singletons) that orchestrate use cases; repository interfaces in
   `Application/Abstractions/`.
 - `Infrastructure/` – in-memory repository implementations.
-- `Controllers/` – HTTP endpoints, request DTOs, input validation, mapping of `DomainError` to ProblemDetails.
+- `Controllers/` – HTTP endpoints; request/response DTOs in `Controllers/Contracts/`. Controllers derive from
+  `ApiControllerBase`, the only place that maps `DomainError` to ProblemDetails (`ProblemFor`, `OkOrProblem`). Domain
+  errors add a `code` extension with the error code.
+- Request DTOs make value-type fields nullable with `[Required]`; otherwise a missing field silently binds to its
+  default (e.g. `0001-01-01`) instead of returning 400. Text fields have no `[Required]`: the domain validates them
+  (presence and length, after trimming), so each field has one error shape with a `code`.
+- Use `CreatedOrProblem` / `OkOrProblem` and the `ProblemJson` constant; don't map errors in controller actions.
+- Route ids are plain `{id}` without a `:guid` constraint, so a malformed id is a 400 from model binding, not a 404.
+- `AllowInputFormatterExceptionMessages = false`: serializer messages contain .NET type names and must not reach
+  clients.
 
 ### Storage: in-memory only
 
@@ -93,7 +102,8 @@ Customer → Policy → Claim (each references its parent by `Guid`).
 - Money is `decimal`, never a floating-point type. Single implicit currency (EUR); no currency field.
   At most 2 decimal places → otherwise 400.
 - Dates are `DateOnly` (calendar dates, no time zones), serialised as `yyyy-MM-dd`. Today's date is not part of any rule.
-- Enums are serialised as strings; unknown values → 400.
+- Enums are serialised as strings; unknown values and integers → 400 (`allowIntegerValues: false`, so enum order
+  never becomes part of the API).
 
 ### Customer
 

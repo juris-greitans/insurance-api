@@ -7,7 +7,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
     .AddControllers()
-    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(allowIntegerValues: false));
+
+        // Don't echo serializer exception messages (they contain .NET type names) in 400 responses.
+        options.AllowInputFormatterExceptionMessages = false;
+    });
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
 

@@ -253,6 +253,22 @@ public class PoliciesControllerTests(WebApplicationFactory<Program> factory)
     }
 
     [Fact]
+    public async Task Get_WhenIdNotAGuid_ThenValidationProblem()
+    {
+        var response = await _api.GetAsync("/policies/not-a-guid");
+
+        await ProblemAssert.IsValidationProblemAsync(response, "id");
+    }
+
+    [Fact]
+    public async Task Activate_WhenIdNotAGuid_ThenValidationProblem()
+    {
+        var response = await _api.PostAsync("/policies/not-a-guid/activate");
+
+        await ProblemAssert.IsValidationProblemAsync(response, "id");
+    }
+
+    [Fact]
     public async Task Get_WhenMissing_ThenNotFoundWithCode()
     {
         var response = await _api.GetAsync($"/policies/{Guid.NewGuid()}");

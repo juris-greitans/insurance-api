@@ -235,6 +235,22 @@ public class ClaimsControllerTests(WebApplicationFactory<Program> factory)
     }
 
     [Fact]
+    public async Task Decide_WhenIdNotAGuid_ThenValidationProblem()
+    {
+        var response = await _api.PostAsync("/claims/not-a-guid/decide", new { decision = "Approve" });
+
+        await ProblemAssert.IsValidationProblemAsync(response, "id");
+    }
+
+    [Fact]
+    public async Task Get_WhenIdNotAGuid_ThenValidationProblem()
+    {
+        var response = await _api.GetAsync("/claims/not-a-guid");
+
+        await ProblemAssert.IsValidationProblemAsync(response, "id");
+    }
+
+    [Fact]
     public async Task Decide_WhenDecisionMissing_ThenValidationProblem()
     {
         var claim = await NewClaimAsync();

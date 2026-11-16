@@ -1,6 +1,7 @@
 using Insurance.Api.Domain.Common;
+using Insurance.Api.Tests.TestSupport;
 
-namespace Insurance.Api.Tests.Unit.Domain;
+namespace Insurance.Api.Tests.Unit.Domain.Common;
 
 public class MoneyTests
 {

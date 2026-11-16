@@ -1,5 +1,6 @@
 using Insurance.Api.Domain.Policies;
 using Insurance.Api.Infrastructure;
+using Insurance.Api.Tests.TestSupport;
 
 namespace Insurance.Api.Tests.Unit.Infrastructure;
 
@@ -37,9 +38,13 @@ public class InMemoryPolicyRepositoryTests
     {
         var customerId = Guid.NewGuid();
 
-        await Task.WhenAll(Enumerable.Range(0, 100).Select(_ => Task.Run(() => _repository.Save(NewPolicy(customerId)))));
+        await Concurrently.RunAsync(16, _ =>
+        {
+            _repository.Save(NewPolicy(customerId));
+            return true;
+        });
 
-        Assert.Equal(100, _repository.GetByCustomer(customerId).Count);
+        Assert.Equal(16, _repository.GetByCustomer(customerId).Count);
     }
 
     [Fact]

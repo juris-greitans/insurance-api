@@ -3,6 +3,7 @@ using Insurance.Api.Application.Abstractions;
 using Insurance.Api.Domain.Customers;
 using Insurance.Api.Domain.Policies;
 using Insurance.Api.Infrastructure;
+using Insurance.Api.Tests.TestSupport;
 using Moq;
 
 namespace Insurance.Api.Tests.Unit.Application;
@@ -127,7 +128,7 @@ public class PolicyServiceTests
                 .Select(_ => _service.Create(customer.Id, ProductType.Auto, Jan1, Dec31, 100m).Value)
                 .ToList();
 
-            var results = await Task.WhenAll(drafts.Select(d => Task.Run(() => _service.Activate(d.Id))));
+            var results = await Concurrently.RunAsync(drafts.Count, i => _service.Activate(drafts[i].Id));
 
             Assert.Single(results, r => r.IsSuccess);
             Assert.Single(_policies.GetByCustomer(customer.Id), p => p.Status == PolicyStatus.Active);

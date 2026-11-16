@@ -1,4 +1,5 @@
 using Insurance.Api.Application;
+using Insurance.Api.Tests.TestSupport;
 
 namespace Insurance.Api.Tests.Unit.Application;
 
@@ -25,17 +26,19 @@ public class WriteLockTests
     {
         var writeLock = new WriteLock();
         var inside = 0;
-        var maxInside = 0;
+        var overlapDetected = 0;
 
-        await Task.WhenAll(Enumerable.Range(0, 50).Select(_ => Task.Run(() => writeLock.Execute(() =>
+        await Concurrently.RunAsync(16, _ => writeLock.Execute(() =>
         {
-            var current = Interlocked.Increment(ref inside);
-            maxInside = Math.Max(maxInside, current);
-            Thread.SpinWait(10_000);
-            Interlocked.Decrement(ref inside);
-            return current;
-        }))));
+            if (Interlocked.Increment(ref inside) > 1)
+            {
+                Interlocked.Exchange(ref overlapDetected, 1);
+            }
 
-        Assert.Equal(1, maxInside);
+            Thread.SpinWait(10_000);
+            return Interlocked.Decrement(ref inside);
+        }));
+
+        Assert.Equal(0, overlapDetected);
     }
 }

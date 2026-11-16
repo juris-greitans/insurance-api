@@ -3,6 +3,7 @@ using Insurance.Api.Application.Abstractions;
 using Insurance.Api.Domain.Claims;
 using Insurance.Api.Domain.Policies;
 using Insurance.Api.Infrastructure;
+using Insurance.Api.Tests.TestSupport;
 using Moq;
 
 namespace Insurance.Api.Tests.Unit.Application;
@@ -117,8 +118,8 @@ public class ClaimServiceTests
         {
             var claim = CreateClaim();
 
-            var results = await Task.WhenAll(Enumerable.Range(0, 8).Select(i => Task.Run(() =>
-                _service.Decide(claim.Id, i % 2 == 0 ? ClaimDecision.Approve : ClaimDecision.Reject, "Reason"))));
+            var results = await Concurrently.RunAsync(8, i =>
+                _service.Decide(claim.Id, i % 2 == 0 ? ClaimDecision.Approve : ClaimDecision.Reject, "Reason"));
 
             var success = Assert.Single(results, r => r.IsSuccess);
             Assert.Equal(success.Value.Status, _claims.FindById(claim.Id)!.Status);

@@ -128,6 +128,8 @@ Customer → Policy → Claim (each references its parent by `Guid`).
 - Integration tests: in-process via `WebApplicationFactory` (no Docker, no network). Cover every endpoint's status codes
   (201/200/400/404/409) and the ProblemDetails shape.
 - Test naming: `MethodUnderTest_WhenCondition_ThenExpectedResult`.
+- Shared test helpers live in `TestSupport/`. Concurrency tests use `Concurrently.RunAsync`, which releases dedicated
+  threads together through a barrier; plain `Task.Run` loops may run sequentially and pass without the lock.
 - Every business rule needs tests for both sides of its boundary (e.g. incident on the first and last policy day,
   periods touching on one day).
 - Coverage of new code must be 80% minimum (enforced by the SonarQube quality gate).

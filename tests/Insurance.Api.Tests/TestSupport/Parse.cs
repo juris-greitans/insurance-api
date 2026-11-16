@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace Insurance.Api.Tests.Unit.Domain;
+namespace Insurance.Api.Tests.TestSupport;
 
 internal static class Parse
 {

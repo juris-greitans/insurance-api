@@ -1,6 +1,6 @@
 using Insurance.Api.Domain.Common;
 
-namespace Insurance.Api.Tests.Unit.Domain;
+namespace Insurance.Api.Tests.Unit.Domain.Common;
 
 public class ResultTests
 {

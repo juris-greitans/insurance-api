@@ -1,7 +1,8 @@
 using Insurance.Api.Domain.Claims;
 using Insurance.Api.Domain.Policies;
+using Insurance.Api.Tests.TestSupport;
 
-namespace Insurance.Api.Tests.Unit.Domain;
+namespace Insurance.Api.Tests.Unit.Domain.Claims;
 
 public class ClaimTests
 {

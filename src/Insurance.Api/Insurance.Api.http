@@ -1,6 +1,56 @@
-@Insurance.Api_HostAddress = http://localhost:5222
+### Walkthrough: customer → policy → activate → claim → decide.
+### Run the API first: dotnet run --project src/Insurance.Api
 
-GET {{Insurance.Api_HostAddress}}/openapi/v1.json
-Accept: application/json
+@host = http://localhost:5222
+
+# @name createCustomer
+POST {{host}}/customers
+Content-Type: application/json
+
+{ "fullName": "Jane Doe" }
 
 ###
+
+# @name createPolicy
+POST {{host}}/policies
+Content-Type: application/json
+
+{
+  "customerId": "{{createCustomer.response.body.$.id}}",
+  "productType": "Auto",
+  "startDate": "2026-01-01",
+  "endDate": "2026-12-31",
+  "premium": 450.00
+}
+
+###
+
+POST {{host}}/policies/{{createPolicy.response.body.$.id}}/activate
+
+###
+
+# @name createClaim
+POST {{host}}/claims
+Content-Type: application/json
+
+{
+  "policyId": "{{createPolicy.response.body.$.id}}",
+  "incidentDate": "2026-06-15",
+  "amountRequested": 1200.50
+}
+
+###
+
+POST {{host}}/claims/{{createClaim.response.body.$.id}}/decide
+Content-Type: application/json
+
+{ "decision": "Reject", "decisionReason": "Damage predates the policy." }
+
+###
+
+GET {{host}}/claims/{{createClaim.response.body.$.id}}
+
+###
+
+# Activating the same policy again returns 409 Policy.NotDraft.
+POST {{host}}/policies/{{createPolicy.response.body.$.id}}/activate

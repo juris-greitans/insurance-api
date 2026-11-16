@@ -32,14 +32,16 @@ Single project `src/Insurance.Api`, organised by folder. Layering is a conventio
 (deliberate simplification; rationale in `README.md`). No CQRS, no mediator library.
 
 - `Domain/` – entities, enums, `Result`/`DomainError` types. No dependency on ASP.NET Core or other folders.
-- `Application/` – services that orchestrate use cases; depend on `Domain/` and repository interfaces.
+- `Application/` – services that orchestrate use cases; repository interfaces in `Application/Abstractions/`.
 - `Infrastructure/` – in-memory repository implementations.
 - `Controllers/` – HTTP endpoints, request DTOs, input validation, mapping of `DomainError` to ProblemDetails.
 
 ### Storage: in-memory only
 
-- Repositories are registered as singletons and use `ConcurrentDictionary<Guid, T>`.
-- Return copies or immutable objects so callers can't mutate stored state.
+- Repositories are registered as singletons and use `ConcurrentDictionary<Guid, T>`. They are synchronous; there is
+  no I/O to await.
+- Entities are immutable records, so repositories return stored instances directly. `Save` inserts or replaces by id.
+- Lookups that may miss are named `FindById` and return `null` (`Get` trips CA1716).
 - All data is lost on restart; that is expected.
 - **Check-then-act races:** `ConcurrentDictionary` does not make a check plus an update atomic. Two concurrent
   activations can both pass the overlap check; two concurrent decisions can both see `New`. Every state-changing
@@ -69,6 +71,12 @@ Validation happens at two levels:
 - When a request fails both a validation rule and a business rule, the validation error (400) wins.
 - Entities are immutable records; state changes (`Activate`, `Decide`) return a new instance. Error instances live in
   static `<Entity>Errors` classes next to each entity; tests assert on them by reference.
+
+## Code conventions
+
+- One top-level type per file, with the file named after the type.
+- One test class per class under test, named `<Class>Tests` in its own file, in the folder under `Unit/` that mirrors
+  the source folder.
 
 ## Domain and business rules
 

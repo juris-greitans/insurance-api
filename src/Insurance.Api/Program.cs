@@ -1,4 +1,6 @@
 using System.Text.Json.Serialization;
+using Insurance.Api.Application.Abstractions;
+using Insurance.Api.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +9,10 @@ builder.Services
     .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
+
+builder.Services.AddSingleton<ICustomerRepository, InMemoryCustomerRepository>();
+builder.Services.AddSingleton<IPolicyRepository, InMemoryPolicyRepository>();
+builder.Services.AddSingleton<IClaimRepository, InMemoryClaimRepository>();
 
 var app = builder.Build();
 

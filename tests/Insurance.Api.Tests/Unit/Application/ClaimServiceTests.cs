@@ -92,7 +92,7 @@ public class ClaimServiceTests
     public void Decide_WhenAlreadyDecided_ThenAlreadyDecidedAndStoredStatusUnchanged()
     {
         var claim = CreateClaim();
-        _service.Decide(claim.Id, ClaimDecision.Approve, null);
+        Assert.True(_service.Decide(claim.Id, ClaimDecision.Approve, null).IsSuccess);
 
         var result = _service.Decide(claim.Id, ClaimDecision.Reject, "Changed my mind");
 

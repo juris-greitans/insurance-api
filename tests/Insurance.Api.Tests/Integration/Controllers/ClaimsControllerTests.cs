@@ -182,7 +182,7 @@ public class ClaimsControllerTests(WebApplicationFactory<Program> factory)
     public async Task Decide_WhenAlreadyDecided_ThenConflictWithCode(string secondDecision)
     {
         var claim = await NewClaimAsync();
-        await DecideAsync(claim.Id, "Approve");
+        await ApiTestClient.ReadSuccessAsync<ClaimResponse>(await DecideAsync(claim.Id, "Approve"));
 
         var response = await DecideAsync(claim.Id, secondDecision, "Reason");
 

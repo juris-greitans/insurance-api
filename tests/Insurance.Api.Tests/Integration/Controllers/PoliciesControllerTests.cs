@@ -22,6 +22,10 @@ public class PoliciesControllerTests(WebApplicationFactory<Program> factory)
 
     private Task<HttpResponseMessage> ActivateAsync(Guid policyId) => _api.PostAsync($"/policies/{policyId}/activate");
 
+    /// <summary>Setup step: activates a policy and fails the test if that doesn't succeed.</summary>
+    private async Task ActivateExistingAsync(Guid policyId) =>
+        await ApiTestClient.ReadSuccessAsync<PolicyResponse>(await ActivateAsync(policyId));
+
     [Fact]
     public async Task Create_WhenValid_ThenReturnsCreatedDraftWithLocation()
     {
@@ -204,7 +208,7 @@ public class PoliciesControllerTests(WebApplicationFactory<Program> factory)
     {
         var customer = await _api.CreateCustomerAsync();
         var existing = await _api.CreatePolicyAsync(customer.Id, "Property", activeStart, activeEnd);
-        await ActivateAsync(existing.Id);
+        await ActivateExistingAsync(existing.Id);
         var draft = await _api.CreatePolicyAsync(customer.Id, "Property", draftStart, draftEnd);
 
         var response = await ActivateAsync(draft.Id);
@@ -219,7 +223,7 @@ public class PoliciesControllerTests(WebApplicationFactory<Program> factory)
     {
         var customer = await _api.CreateCustomerAsync();
         var existing = await _api.CreatePolicyAsync(customer.Id, "Auto", "2026-01-01", "2026-06-29");
-        await ActivateAsync(existing.Id);
+        await ActivateExistingAsync(existing.Id);
         var draft = await _api.CreatePolicyAsync(customer.Id, "Auto", "2026-06-30", "2026-12-31");
 
         var response = await ActivateAsync(draft.Id);
@@ -232,8 +236,8 @@ public class PoliciesControllerTests(WebApplicationFactory<Program> factory)
     {
         var customer = await _api.CreateCustomerAsync();
         var otherCustomer = await _api.CreateCustomerAsync();
-        await ActivateAsync((await _api.CreatePolicyAsync(customer.Id, "Travel")).Id);
-        await ActivateAsync((await _api.CreatePolicyAsync(otherCustomer.Id, "Auto")).Id);
+        await ActivateExistingAsync((await _api.CreatePolicyAsync(customer.Id, "Travel")).Id);
+        await ActivateExistingAsync((await _api.CreatePolicyAsync(otherCustomer.Id, "Auto")).Id);
         var draft = await _api.CreatePolicyAsync(customer.Id, "Auto");
 
         var response = await ActivateAsync(draft.Id);

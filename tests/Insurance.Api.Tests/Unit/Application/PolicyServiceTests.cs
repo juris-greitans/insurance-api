@@ -25,6 +25,9 @@ public class PolicyServiceTests
         _customers.Save(_customer);
     }
 
+    /// <summary>Setup step: activates a policy and fails the test if that doesn't succeed.</summary>
+    private void ActivateExisting(Guid policyId) => Assert.True(_service.Activate(policyId).IsSuccess);
+
     private Policy CreateDraft(DateOnly start, DateOnly end, ProductType productType = ProductType.Auto) =>
         _service.Create(_customer.Id, productType, start, end, 100m).Value;
 
@@ -85,7 +88,7 @@ public class PolicyServiceTests
     public void Activate_WhenAlreadyActive_ThenNotDraft()
     {
         var draft = CreateDraft(Jan1, Dec31);
-        _service.Activate(draft.Id);
+        ActivateExisting(draft.Id);
 
         var result = _service.Activate(draft.Id);
 
@@ -97,7 +100,7 @@ public class PolicyServiceTests
     {
         var first = CreateDraft(Jan1, new DateOnly(2026, 6, 30));
         var second = CreateDraft(new DateOnly(2026, 6, 30), Dec31);
-        _service.Activate(first.Id);
+        ActivateExisting(first.Id);
 
         var result = _service.Activate(second.Id);
 
@@ -110,7 +113,7 @@ public class PolicyServiceTests
     {
         var auto = CreateDraft(Jan1, Dec31, ProductType.Auto);
         var travel = CreateDraft(Jan1, Dec31, ProductType.Travel);
-        _service.Activate(auto.Id);
+        ActivateExisting(auto.Id);
 
         var result = _service.Activate(travel.Id);
 

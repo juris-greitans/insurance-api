@@ -31,10 +31,10 @@ Prerequisites: .NET SDK 10, Java 17+ runtime (required by `dotnet-sonarscanner`)
 Single project `src/Insurance.Api`, organised by folder. Layering is a convention, not enforced by project references
 (deliberate simplification; rationale in `README.md`). No CQRS, no mediator library.
 
-- `Domain/` – entities, enums, `Result`/`Error` types. No dependency on ASP.NET Core or other folders.
+- `Domain/` – entities, enums, `Result`/`DomainError` types. No dependency on ASP.NET Core or other folders.
 - `Application/` – services that orchestrate use cases; depend on `Domain/` and repository interfaces.
 - `Infrastructure/` – in-memory repository implementations.
-- `Controllers/` – HTTP endpoints, request DTOs, input validation, mapping of `Error` to ProblemDetails.
+- `Controllers/` – HTTP endpoints, request DTOs, input validation, mapping of `DomainError` to ProblemDetails.
 
 ### Storage: in-memory only
 
@@ -51,7 +51,8 @@ Single project `src/Insurance.Api`, organised by folder. Layering is a conventio
 Failures are signalled with returned `Result`/`Result<T>` objects, not exceptions. Exceptions are reserved for bugs and unexpected run-time conditions.
 Unhandled exceptions return a 500 ProblemDetails (`AddProblemDetails()` + `UseExceptionHandler()`), never a stack trace.
 
-`Error` carries a type that maps to the HTTP status in one place (controller base class or helper):
+`DomainError` (named so to avoid CA1716; `Error` is a VB keyword) carries an `ErrorType` that maps to the HTTP status
+in one place (controller base class or helper):
 
 | Error type   | Status | Examples |
 |--------------|--------|----------|
@@ -65,6 +66,9 @@ Validation happens at two levels:
 - Domain invariants enforced by the entities themselves, independently of API validation. Entities are created via
   factory methods returning `Result<T>`; constructors are private. An invariant violation that slips past API
   validation must still come out as 400 or 409, never 500.
+- When a request fails both a validation rule and a business rule, the validation error (400) wins.
+- Entities are immutable records; state changes (`Activate`, `Decide`) return a new instance. Error instances live in
+  static `<Entity>Errors` classes next to each entity; tests assert on them by reference.
 
 ## Domain and business rules
 
@@ -95,7 +99,8 @@ Customer → Policy → Claim (each references its parent by `Guid`).
 - Created only for an `Active` policy → otherwise 409. Policy status counts, not today's date.
 - `IncidentDate` within the policy period, inclusive → otherwise 409.
 - Decision only from `New` → otherwise 409.
-- Reject requires a non-whitespace `DecisionReason` → otherwise 400. On Approve, a supplied reason is ignored (not stored).
+- Reject requires a non-whitespace `DecisionReason`, max 1000 characters → otherwise 400. On Approve, a supplied reason
+  is ignored (not stored).
 
 ### HTTP responses
 
